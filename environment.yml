@@ -1,0 +1,6 @@
+name: base
+channels:
+  - defaults
+dependencies:
+  - pandas=1.2.4=py38h2531618_0
+prefix: /opt/conda

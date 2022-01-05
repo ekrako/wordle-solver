@@ -5,10 +5,16 @@ import re
 # %%
 df = pd.read_csv('dataset.csv', index_col=0)
 normalized_df = (df-df.mean())/df.std()
-weights = [10, 5, 0.3]
+weights = [1, 5, 1]
 normalized_df['score'] = normalized_df.dot(weights)
 words = normalized_df.sort_values('score', ascending=False)
 words.to_csv('words.csv')
+
+
+def remove_word_from_dataset(word):
+    df = pd.read_csv('dataset.csv', index_col=0)
+    df.drop(word).to_csv('dataset.csv')
+
 
 # %%
 words = pd.read_csv('words.csv', index_col=0)
@@ -78,6 +84,11 @@ while len(words) > 1:
     while not pattern.match(result):
         result = input(
             'Enter result (* - char inplace, + - in word not place, - - char not in word): ')
+        if result == 'remove':
+            remove_word_from_dataset(guess)
+            words.drop(guess, inplace=True)
+            guess = words.index[0]
+            print('my guess is:', guess)
     if result == '*'*5:
         break
     words = remove_not_in_word(words, guess, result)

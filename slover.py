@@ -1,11 +1,12 @@
 #! /opt/conda/bin/python
 import pandas as pd
+from numpy.random import choice
 import re
 
 # %%
 df = pd.read_csv('dataset.csv', index_col=0)
 normalized_df = (df-df.mean())/df.std()
-weights = [1, 5, 1]
+weights = [10, 5, 0.5]
 normalized_df['score'] = normalized_df.dot(weights)
 words = normalized_df.sort_values('score', ascending=False)
 words.to_csv('words.csv')
@@ -75,29 +76,33 @@ def remove_in_place(words, guess, result):
 
 
 # %%
-words = pd.read_csv('words.csv', index_col=0)
-while len(words) > 1:
-    guess = words.index[0]
-    print('my guess is:', guess)
-    result = ''
-    pattern = re.compile('^[\*\+\-]{5}$')
-    while not pattern.match(result):
-        result = input(
-            'Enter result (* - char inplace, + - in word not place, - - char not in word): ')
-        if result == 'remove':
-            remove_word_from_dataset(guess)
-            words.drop(guess, inplace=True)
-            guess = words.index[0]
-            print('my guess is:', guess)
-    if result == '*'*5:
-        break
-    words = remove_not_in_word(words, guess, result)
-    words = remove_in_place(words, guess, result)
-    words = remove_not_in_place(words, guess, result)
-    print(len(words), 'words left')
-if len(words) == 0:
-    print('did not find')
-else:
-    print(words.index[0], 'is the word')
+if __name__ == '__main__':
+    words = pd.read_csv('words.csv', index_col=0)
+    while len(words) > 1:
+        n = min(len(words), 5)
+        top = words.head(n)
+        draw = choice(range(n), n, p=top['score'].values/top['score'].sum())[0]
+        guess = words.index[draw]
+        print('my guess is:', guess)
+        result = ''
+        pattern = re.compile(r'^[\*\+\-]{5}$')
+        while not pattern.match(result):
+            result = input(
+                'Enter result (* - char inplace, + - in word not place, - - char not in word): ')
+            if result == 'remove':
+                remove_word_from_dataset(guess)
+                words.drop(guess, inplace=True)
+                guess = words.index[0]
+                print('my guess is:', guess)
+        if result == '*'*5:
+            break
+        words = remove_not_in_word(words, guess, result)
+        words = remove_in_place(words, guess, result)
+        words = remove_not_in_place(words, guess, result)
+        print(len(words), 'words left')
+    if len(words) == 0:
+        print('did not find')
+    else:
+        print(words.index[0], 'is the word')
 
 # %%

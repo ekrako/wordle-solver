@@ -6,15 +6,16 @@ import re
 # %%
 df = pd.read_csv('dataset.csv', index_col=0)
 normalized_df = (df-df.mean())/df.std()
-weights = [10, 5, 0.5]
+weights = [20, 20, 3]
 normalized_df['score'] = normalized_df.dot(weights)
+normalized_df['score'] -= normalized_df['score'].min()
 words = normalized_df.sort_values('score', ascending=False)
 words.to_csv('words.csv')
 
 
 def remove_word_from_dataset(word):
-    df = pd.read_csv('dataset.csv', index_col=0)
-    df.drop(word).to_csv('dataset.csv')
+    rdf = pd.read_csv('dataset.csv', index_col=0)
+    rdf.drop(word).to_csv('dataset.csv')
 
 
 # %%
@@ -79,8 +80,9 @@ def remove_in_place(words, guess, result):
 if __name__ == '__main__':
     words = pd.read_csv('words.csv', index_col=0)
     while len(words) > 1:
-        n = min(len(words), 5)
+        n = min(len(words), 8)
         top = words.head(n)
+        print(top)
         draw = choice(range(n), n, p=top['score'].values/top['score'].sum())[0]
         guess = words.index[draw]
         print('my guess is:', guess)

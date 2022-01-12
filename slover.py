@@ -3,10 +3,11 @@ import pandas as pd
 from numpy.random import choice
 import re
 
+TOP_N_SELECT = 4
 # %%
 df = pd.read_csv('dataset.csv', index_col=0)
 normalized_df = (df-df.mean())/df.std()
-weights = [20, 20, 3]
+weights = [3, 1]
 normalized_df['score'] = normalized_df.dot(weights)
 normalized_df['score'] -= normalized_df['score'].min()
 words = normalized_df.sort_values('score', ascending=False)
@@ -80,9 +81,9 @@ def remove_in_place(words, guess, result):
 if __name__ == '__main__':
     words = pd.read_csv('words.csv', index_col=0)
     while len(words) > 1:
-        n = min(len(words), 8)
+        n = min(len(words), TOP_N_SELECT)
         top = words.head(n)
-        print(top)
+
         draw = choice(range(n), n, p=top['score'].values/top['score'].sum())[0]
         guess = words.index[draw]
         print('my guess is:', guess)
